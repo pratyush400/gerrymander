@@ -1,0 +1,98 @@
+from collections import deque
+import random
+
+class BacktrackingGerrymander:
+    TARGET_SIZE = 9   # Target size is the number of voters wanted per district
+
+    def backtrack(self, electorate, party):  # kinda like an init?
+        graph = electorate.graph                    #adjacent structure
+        voters = electorate.number_of_voters()      #total number of voters
+        d = electorate.district_size()              #N/TARGET_size
+
+        def is_connected(group):  # Checks connectivity of a set, no one disjointed
+            start = next(iter(group))  #iterates through group takes one node from it
+            visited = {start}           # tracks nodes visited
+            queue = deque([start])      # the nodes to explore next
+            while queue:                #Best First Search
+                u = queue.popleft()     #take node out of queue
+                for w in graph.neighbors(u):#looks at adjacent node
+                    if w in group and w not in visited: #only looks at the edges of nodes that are not visited and inside the district(w group)
+                        visited.add(w)
+                        queue.append(w) #add valid neighbors to visited and queue to then check its neighbors
+            return len(visited) == len(group)  #if every node is reached return True
+
+        def score(group):
+            """Counts how many voters in the group vote for the target party"""
+            votes = sum(electorate.votes[i] == party for i in group)
+            opp = self.TARGET_SIZE - votes
+            return votes, opp
+
+        def classify(group):  # a lil confused on how this is useful
+            votes, opp = score(group)
+            if votes == 5 and opp == 4: return 0  # BEST: ideal 5–4
+            if opp >= 8: return 1  # crack opponent
+            if votes > 4: return 2  # normal win
+            return 3  # fallback
+
+        def grow(start_node, used):  # BFS
+            target = self.TARGET_SIZE
+            queue = [start_node]
+            group = {start_node}
+            while queue and len(group) < target:  # nodes < 9
+                node = queue.pop(0)
+                neighbors = list(graph.neighbors(node))
+                random.shuffle(neighbors)  # random bfs
+                for n in neighbors:  # eligible neighbors
+                    if n not in group and n not in used:
+                        group.add(n)
+                        queue.append(n)
+                        if len(group) == target:  # already have 9 voters
+                            break
+            if len(group) != target:  # dead end, give up
+                return None
+            return [group] if is_connected(group) else None  # make sure real district
+
+        def build(used, districts):     #  tries to create all districts with grow function
+            if len(districts) == d:     # if all districts made return the list of districts
+                return districts
+
+            for seed in range(voters):  #loop through all voters
+                if seed in used:        #skip seeds already in a district
+                    continue
+
+                built_group = grow(seed, used)  # jolie changed this
+                if not built_group:     #if that doesn't work try another seed(voter)
+                    continue
+
+                gset = built_group[0]      #if the built_group works add to list of districts
+                districts.append(list(gset))
+                used |= gset               #have all voters in district set to used
+
+                result = build(used, districts) #now recursively build a new district
+                if result:                  # if it works return result
+                    return result
+
+                used -= gset        # if the recursion doesn't work remove the voters from district and remove from used list
+                districts.pop()
+            return None     # if every voter fails return none
+        return build(set(), []) # makes a list starting with no used voters and no districts
+
+    def best_of_trials(self, electorate, party):
+        trials = 5 # hard for my computer you can increase for a better result
+        best = None
+        best_wins = -1
+
+        for _ in range(trials):
+            gm = BacktrackingGerrymander()
+            districts = gm.backtrack(electorate, party)
+            wins = electorate.get_wins(districts, party)
+
+            if wins > best_wins:
+                best = districts
+                best_wins = wins
+
+                # early exit if  party wins
+                if wins > self.TARGET_SIZE // 2:
+                    break
+
+        return best
