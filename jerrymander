@@ -27,13 +27,6 @@ class BacktrackingGerrymander:
             opp = self.TARGET_SIZE - votes
             return votes, opp
 
-        def classify(group):  # a lil confused on how this is useful
-            votes, opp = score(group)
-            if votes == 5 and opp == 4: return 0  # BEST: ideal 5–4
-            if opp >= 8: return 1  # crack opponent
-            if votes > 4: return 2  # normal win
-            return 3  # fallback
-
         def grow(start_node, used):  # BFS
             target = self.TARGET_SIZE
             queue = [start_node]
@@ -72,7 +65,7 @@ class BacktrackingGerrymander:
                 if result:                  # if it works return result
                     return result
 
-                used -= gset        # if the recursion doesn't work remove the voters from district and remove from used list
+0                used -= gset        # if the recursion doesn't work remove the voters from district and remove from used list
                 districts.pop()
             return None     # if every voter fails return none
         return build(set(), []) # makes a list starting with no used voters and no districts
@@ -96,3 +89,17 @@ class BacktrackingGerrymander:
                     break
 
         return best
+"""
+1. How does your algorithm work? Explain clearly, using diagrams if they help.
+    Our algorithm does a recursive random BFS. The BFS finds a working district of nine, which is then repeated till all voters are in one of the nine districts. 
+    This process is then repeated based on the number of trials specified, and it returns the trial with the best results for the party given. 
+    Sometimes it has a harder time finding districts that work, and it is best just to run the program again.
+2. How effective is your algorithm on Electorates of various sizes(9,19,29)
+    It is not effective for any of the sizes. The running time drastically increases as the BFS will take longer to find all the members of a district, and the recursion will have to happen more, with more districts needing to be created
+3. What difficulties did you encounter and how did you overcome them?
+    I had a hard time testing my program with how long it takes to run. I was struggling to come up with a faster way for it to run. Originally, 
+    I tried to make it so that the program would prioritize districts with the party having a small majority, and if that isn't possible, try grouping all the enemy party, then just giving up and finding a working district. 
+    I either executed this incorrectly and/or it took too long, so I pivoted to doing trials.  
+4. How did your team work together to solve this problem? How can you improve this process in future projects?"""
+    We all met up outside of class to come up with a game plan. Emma ended up creating a recursive function with another recursive function for gerrymandering. Jolie edited it into a more efficient function using BFS for the grow function.
+    For future projects, this process would be improved a bit if we procrastinated a bit less.
