@@ -1,8 +1,10 @@
+__author__ = 'Emma, Jolie, Pratyush'
+
 from collections import deque
 import random
 
 class BacktrackingGerrymander:
-    TARGET_SIZE = 9   # Target size is the number of voters wanted per district
+    TARGET_SIZE = 9   # Target size is the number of voters wanted per district, can edit but will have to edit the e value of the other code
 
     def backtrack(self, electorate, party):  # kinda like an init?
         graph = electorate.graph                    #adjacent structure
@@ -101,5 +103,6 @@ class BacktrackingGerrymander:
     I tried to make it so that the program would prioritize districts with the party having a small majority, and if that isn't possible, try grouping all the enemy party, then just giving up and finding a working district. 
     I either executed this incorrectly and/or it took too long, so I pivoted to doing trials.  
 4. How did your team work together to solve this problem? How can you improve this process in future projects?"""
-    We all met up outside of class to come up with a game plan. Emma ended up creating a recursive function with another recursive function for gerrymandering. Jolie edited it into a more efficient function using BFS for the grow function.
+    We all met up outside of class to come up with a game plan. Emma and Jolie worked through strategies to tackle the problem.
+    Emma ended up creating a recursive function with another recursive function for gerrymandering. Jolie edited it into a more efficient function using BFS for the grow function.
     For future projects, this process would be improved a bit if we procrastinated a bit less.
